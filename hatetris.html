@@ -505,7 +505,8 @@
 				replayOut.push(transformId);
 
 				// redraw well
-				drawWell(liveWell);
+        //TODO note that this is commented out - speeds things up quite a bit.
+				//drawWell(liveWell);
 
 				// is the game over?
 				// it is impossible to get bits at row (bar - 2) or higher without getting a bit at row (bar - 1)
@@ -575,7 +576,7 @@
 					// if there is still replay left, time in another step from the replay
 					// otherwise, allow the user to continue the game
 					if(replayIn.length > 0) {
-						replayTimeoutId = setTimeout("inputReplayStep();", 50);
+						inputReplayStep();
 					} else {
 						document.onkeydown = inputKey;
 					}
@@ -602,7 +603,7 @@
 
 				// there may be a replay in progress, this
 				// must be killed
-				clearTimeout(replayTimeoutId);
+				//clearTimeout(replayTimeoutId);
 
 				// disable user input while showing a replay
 				document.onkeydown = null;
@@ -750,10 +751,111 @@
 
 				return worstRating;
 			}
+      function spaceEvery4(inputString){
+        var output = '';
+        for(var i=0;i<inputString.length;i++){
+          if (i>0 && i%4 ==0)
+            output += ' ';
+          output+=inputString.charAt(i);
+        }
+        return output;
+      }
+      
+      function randomGame(){
+        var returnString = '';
+        var game = new Array();
+        for(var i=0;i<10;i++){
+          game[i] = i;
+        }
+        game[10] = 'A';
+        game[11] = 'B';
+        game[12] = 'C';
+        game[13] = 'D';
+        game[14] = 'E';
+        game[15] = 'F';
+        numberChars = Math.floor(Math.random()*1000);
+        for(var i=0;i<numberChars;i++){
+          //Make A's 10% of the time.
+          var a = Math.floor(Math.random()*10);
+          if (a == 1){
+            returnString+='A';
+          }
+          else{
+            returnString += game[Math.floor(Math.random()*16)];
+          }
+        }
+        return spaceEvery4(returnString);
+      }
+
+      function playOne(game){
+        startReplay(game); 
+        return document.getElementById('score').innerHTML
+      }
       function twoGames(){
-        startReplay('AAAA');
-        alert('Done one')
-        startReplay('BABA');
+        //startReplay();
+        var population = Array();
+        function critter(fitness,genome){
+          this.fitness = fitness;
+          this.genome = genome;
+        }
+        function sortByFitness(a,b){
+          return ((a.fitness > b.fitness) ? -1 : (a.fitness < b.fitness) ? 1:0);
+        }
+        var popSize = 24;
+        for(var i=0;i<popSize;i++){
+          population[population.length++] = new critter(0,randomGame());
+        }
+        //cheat, and seed two awesome plays
+        //population[population.length++] = new critter(0,'032A AAAA AAAA 8C00 AAAA AA8C AAAA AAAA AB00 AAAA AB22 AAAA AABA AAAA AAA8 0002 EAAA A8C0 AAAA B0AA AAAA B000 16AA AAA7 2AAA AAAA EAAA AAA7 6AAA AAAA AD6A AAAA AAD5 556A AAAA AA95 56AA AAAA AA6A AAAA AA55 6AAA AAAA 8AAA AAA9 4AAA AAAA 9556 AAAA AAA0 2AAA AAAA AA8A A6AA AAAA A556 AAAA AA00 02AA AAA0 00AA AAA2 AAAA 2AAA 82A6 AAAA A2AA 62AA A56A AAA2 D6AA AA95 76AA AA80 0AAA AAA8 02AA A802 AAA8 00AA ACAA AAEA AAD6 AAAA B556 AAAA 556A AAA6 AAAB D555 6AAA 8AAA A02A AAD5 AAAB 6AAB 555A AB56 AAE2 AA00 F7AA AC2A A83A A7AA B5AA C000 AAA5 A82A B000 A8');
+        //population[population.length++] = new critter(0,'56AA AAAA AA9A AAAA AAAA 8AAA AAAA AA00 AAAA AAAA ACAA AA8A AAB2 AAAA AAA5 6AAA AAAA 9AAA AAAA AEAA AAAA 9F5A AAAA ABD6 AAAA AAD5 6AAA AAAB 00AA AAAA AEAA AAAA FD6A AAAA BD56 AAAA AF5A AAAA FEAA AAB5 5AAA ABC2 AAAA 9BF0 0AAA AAA6 BBF0 0AAA AAAB AC02 AAAA AAEA AAAB 6AAA AB55 AAAA B56A AAAB 5AAA AA80 AAAA AA82 AAAA AB2A AAAC 02AA AAAB F6AA AAFE AAA5 6AAA AF56 AAAD 56AA BF55 AABC 2AAA 6FC0 2AAA A6BB F00A AAAA EB00 AAAA AE5A AAEA AADA AAA0 2AAA A82A AAAC AAAC 02AA AAD5 5AAA B5C0 AAB5 6AA9 AAAF 6ABD 56AB F00A AA6B BF00 AAAB A5AA B00A AAB2 AA5A A96A B55A A80A AA80 2AAA C2AA B0AA C02A AC02 A9C2 A9E9 76A6 AAEA');
+        population[population.length++] = new critter(0,'AAAB 00AA AAAA AB0A AAAA AAAA AAAE AAAA AD6A AAAA AAC0 0AAA AAAA C02A AAAA AAB2 28AA AAAC 2AAA AAAA E2AA AAAB 6AAA A8AA 97A5 6AAA AAAA AAEA AAAE AABA AABA ABAA');
+        popSize++;
+        //popSize+=2;
+        generationLimit =100;
+        var avgFit;
+        for (var j=0;j<generationLimit;j++){
+          avgFit = 0;
+          for(var i=0;i<popSize;i++){
+            population[i].fitness = parseInt(playOne(population[i].genome));
+            avgFit+=population[i].fitness;
+          }
+          population.sort(sortByFitness);
+          document.getElementById('fitHistory').innerHTML += "<tr><td>" + j + "&nbsp;&nbsp;</td><td>" +population[0].fitness + "&nbsp;&nbsp;</td><td>"+ avgFit/popSize + "&nbsp;&nbsp;</td><td>" + population[0].genome + "</td></tr>";
+          //fitness evaluated, rearrange individuals
+          //copy over the best by simply adding the offset in the next loop
+          
+          //cross over all individuals, crossing 1 with 2, 3 with 4, etc.
+          //off set is 4
+          for(var k=0;k<16;k+=2){
+            genome1 = population[k].genome.split(' ').join("");
+            genome2 = population[k+1].genome.split(' ').join("");
+            splitPoint1 = Math.floor(Math.random()*genome1.length);
+            splitPoint2 = Math.floor(Math.random()*genome2.length);
+            rGenome1 = "";
+            rGenome2 = "";
+            for(var i =0;i<splitPoint1;i++){
+              rGenome1+=genome1.charAt(i);
+            }
+            for(var i=splitPoint2;i<genome2.length;i++){
+              rGenome1+=genome2.charAt(i);
+            }
+            for(var i =0;i<splitPoint2;i++){
+              rGenome2+=genome2.charAt(i);
+            }
+            for(var i=splitPoint1;i<genome1.length;i++){
+              rGenome2+=genome1.charAt(i);
+            }
+            population[k+4].genome = spaceEvery4(rGenome1);
+            population[k+5].genome = spaceEvery4(rGenome2);
+          }
+          //random Mutation
+          for(var k=17;k<popSize;k++){
+            g = population[k].genome;
+            population[k] = Array();
+            population[k].fitness = 0;
+            population[k].genome = g;
+          }
+        }
       }
 		// --></script>
 
@@ -773,6 +875,8 @@
       <p><button type="button" onClick="twoGames();">show a game</button></p>
 			<p><span id="score"></span></p>
 			<p><span id="replayOut"></span></p>
+      <table id="fitHistory">
+      </table>
 		</div>
 	</body>
 </html> 
