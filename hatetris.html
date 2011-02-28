@@ -777,8 +777,9 @@
         hexChart[12] = 'D';
         hexChart[13] = 'E';
         hexChart[14] = 'F';
-        //adding a plus 1 to make sure there's never an empty genome
-        numberChars = Math.floor(Math.random()*1000)+1;
+        //adding a plus 45 because 45 is the minimum number of plays
+        //necessary to die
+        numberChars = Math.floor(Math.random()*1000)+45;
 
         for(var i=0;i<numberChars;i++){
           //Make extra A's
@@ -806,6 +807,11 @@
           avgFit = 0;
           for(var i=0;i<popSize;i++){
             population[i].fitness = parseInt(playOne(population[i].genome));
+            //Tweek the fitness by -0.5 if the length is less than 45, the minimum number of moves to die
+            //we only need to tweek by 0.5 since length must be > 45 in order to have any points
+            //TODO should there be more done with this? For example, pad anyone less than 45 with a random string?
+            if(population[i].genome.length < 45)
+              population[i].fitness -= 0.5;
             avgFit+=population[i].fitness;
           }
           population.sort(sortByFitness);
@@ -825,13 +831,13 @@
           row.appendChild(td3);
           row.appendChild(td4);
           table.appendChild(row);
-          //document.getElementById('fitHistory').innerHTML += "<tr><td>" + j + "&nbsp;&nbsp;</td><td>" +population[0].fitness + "&nbsp;&nbsp;</td><td>"+ avgFit/popSize + "&nbsp;&nbsp;</td><td>" + population[0].genome + "</td></tr>";
           
           //fitness evaluated, rearrange individuals
           //copy over the best by simply adding the offset in the next loop
           
           //cross over all individuals, crossing 1 with 2, 3 with 4, etc.
           //off set is 4
+          toSave = Math.floor(((document.getElementById('save').value)/100)*popSize);
           for(var k=0;k<16;k+=2){
             genome1 = population[k].genome.split(' ').join("");
             genome2 = population[k+1].genome.split(' ').join("");
@@ -851,17 +857,39 @@
             for(var i=splitPoint1;i<genome1.length;i++){
               rGenome2+=genome1.charAt(i);
             }
-            population[k+4].genome = spaceEvery4(rGenome1);
-            population[k+5].genome = spaceEvery4(rGenome2);
+            population[k+toSave].genome = spaceEvery4(rGenome1);
+            population[k+toSave+1].genome = spaceEvery4(rGenome2);
+          }
+          //randomly cut out chunks of genome
+          for(var k=4;k<popSize;k++){
+            //TODO make this a parameter
+            g = population[k].genome
+            point = Math.floor(Math.random()*g.length);
+            //cut out up to half of genome
+            len = Math.floor((Math.random()*g.length)/2);
+            population[k].genome='';
+            for(var l=0;l<point;l++){
+              population[k].genome+=g.charAt(l);
+            }
+            for(var l=point+len;l<g.length;l++){
+              population[k].genome+=g.charAt(l);
+            }
           }
           //random Mutation
           for(var k=17;k<popSize;k++){
             g = population[k].genome;
             population[k] = Array();
             population[k].fitness = 0;
-            population[k].genome = g;
+            population[k].genome = randomGame();
+          }
+          //pad anyone less than 45 with a bunch of random crap
+          for(var k=0;k<popSize;k++){
+            if(population[k].genome.length < 45){
+              population[k].genome += randomGame();
+            }
           }
           j++;
+          window.scrollBy(0,500);//This is an arbritrary amount
           if(j<generationLimit) window.setTimeout(function(){ work(j); }, 300);
         }
         work(0);
@@ -890,9 +918,6 @@
           popSize++;
         }
         workloop(population,popSize);
-        //popSize+=2;
-        
-        
       }
 		// --></script>
 
@@ -910,8 +935,9 @@
 			<p><a href="http://qntm.org/hatetris">Inspired by HATETRIS by Sam Hughes</a></p>
       <form name="options">
         <label>Number of Generations:<input type="text" name="genSize" id="genSize" value="20"></label><br>
-        <label>Percent of a newly randomly generated genome that is an 'A' (drop)<input type="text" name="aPercent" id="aPercent" value="10"></label><br>
-        <label>Include a One Point run in initial population?<input type="checkbox" name="one" id="one"></label>
+        <label>Percent of a newly randomly generated genome that is an 'A' (drop)<input type="text" name="aPercent" id="aPercent" value="20"></label><br>
+        <label>Include a One Point run in initial population?<input type="checkbox" name="one" id="one"></label><br>
+        <label>Percent to Save?<input type="text" name="save" id="save" value="20"></label>
        </form>
 <!--			<p><button type="button" onclick="startGame(0);">start new game</button></p>
 			<p><button type="button" onclick="startReplay();">show a replay</button></p>-->
