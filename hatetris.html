@@ -20,6 +20,9 @@
 				text-align: center;
 				vertical-align: middle;
 			}
+      #fitHistory td{
+        padding-right:1em;
+      }
 		</style>
 		<script type="text/javascript"><!--
 			// global well attributes
@@ -795,32 +798,11 @@
         startReplay(game); 
         return document.getElementById('score').innerHTML
       }
-      function evolve(){
-        //clear out the existing text in our table
-        document.getElementById('fitHistory').innerHTML = "";
-        var population = Array();
-        function critter(fitness,genome){
-          this.fitness = fitness;
-          this.genome = genome;
-        }
-        function sortByFitness(a,b){
-          return ((a.fitness > b.fitness) ? -1 : (a.fitness < b.fitness) ? 1:0);
-        }
-        var popSize = 24;
-        for(var i=0;i<popSize;i++){
-          population[population.length++] = new critter(0,randomGame());
-        }
-        //cheat, and seed two awesome plays
-        //population[population.length++] = new critter(0,'032A AAAA AAAA 8C00 AAAA AA8C AAAA AAAA AB00 AAAA AB22 AAAA AABA AAAA AAA8 0002 EAAA A8C0 AAAA B0AA AAAA B000 16AA AAA7 2AAA AAAA EAAA AAA7 6AAA AAAA AD6A AAAA AAD5 556A AAAA AA95 56AA AAAA AA6A AAAA AA55 6AAA AAAA 8AAA AAA9 4AAA AAAA 9556 AAAA AAA0 2AAA AAAA AA8A A6AA AAAA A556 AAAA AA00 02AA AAA0 00AA AAA2 AAAA 2AAA 82A6 AAAA A2AA 62AA A56A AAA2 D6AA AA95 76AA AA80 0AAA AAA8 02AA A802 AAA8 00AA ACAA AAEA AAD6 AAAA B556 AAAA 556A AAA6 AAAB D555 6AAA 8AAA A02A AAD5 AAAB 6AAB 555A AB56 AAE2 AA00 F7AA AC2A A83A A7AA B5AA C000 AAA5 A82A B000 A8');
-        //population[population.length++] = new critter(0,'56AA AAAA AA9A AAAA AAAA 8AAA AAAA AA00 AAAA AAAA ACAA AA8A AAB2 AAAA AAA5 6AAA AAAA 9AAA AAAA AEAA AAAA 9F5A AAAA ABD6 AAAA AAD5 6AAA AAAB 00AA AAAA AEAA AAAA FD6A AAAA BD56 AAAA AF5A AAAA FEAA AAB5 5AAA ABC2 AAAA 9BF0 0AAA AAA6 BBF0 0AAA AAAB AC02 AAAA AAEA AAAB 6AAA AB55 AAAA B56A AAAB 5AAA AA80 AAAA AA82 AAAA AB2A AAAC 02AA AAAB F6AA AAFE AAA5 6AAA AF56 AAAD 56AA BF55 AABC 2AAA 6FC0 2AAA A6BB F00A AAAA EB00 AAAA AE5A AAEA AADA AAA0 2AAA A82A AAAC AAAC 02AA AAD5 5AAA B5C0 AAB5 6AA9 AAAF 6ABD 56AB F00A AA6B BF00 AAAB A5AA B00A AAB2 AA5A A96A B55A A80A AA80 2AAA C2AA B0AA C02A AC02 A9C2 A9E9 76A6 AAEA');
-        if(document.options.one.checked){
-          population[population.length++] = new critter(0,'AAAB 00AA AAAA AB0A AAAA AAAA AAAE AAAA AD6A AAAA AAC0 0AAA AAAA C02A AAAA AAB2 28AA AAAC 2AAA AAAA E2AA AAAB 6AAA A8AA 97A5 6AAA AAAA AAEA AAAE AABA AABA ABAA');
-          popSize++;
-        }
-        //popSize+=2;
+
+      function workloop(population,popSize){
         generationLimit =parseInt(document.getElementById('genSize').value);
         var avgFit;
-        for (var j=0;j<generationLimit;j++){
+        function work(j){
           avgFit = 0;
           for(var i=0;i<popSize;i++){
             population[i].fitness = parseInt(playOne(population[i].genome));
@@ -828,7 +810,20 @@
           }
           population.sort(sortByFitness);
           //TODO for when fitness is 0, add a fitness value for length of genome? under the argument that a long genome is more likely to fill everyting in?
-          document.getElementById('fitHistory').innerHTML += "<tr><td>" + j + "&nbsp;&nbsp;</td><td>" +population[0].fitness + "&nbsp;&nbsp;</td><td>"+ avgFit/popSize + "&nbsp;&nbsp;</td><td>" + population[0].genome + "</td></tr>";
+          var table = document.getElementById('fitHistory');
+          var row = document.createElement('tr');
+          var td1 = document.createElement('td');
+          td1.appendChild(document.createTextNode(j));
+          var td2 = document.createElement('td');
+          td2.appendChild(document.createTextNode(population[0].fitness));
+          var td3 = document.createElement('td');
+          td3.appendChild(document.createTextNode(population[0].genome));
+          row.appendChild(td1);
+          row.appendChild(td2);
+          row.appendChild(td3);
+          table.appendChild(row);
+          //document.getElementById('fitHistory').innerHTML += "<tr><td>" + j + "&nbsp;&nbsp;</td><td>" +population[0].fitness + "&nbsp;&nbsp;</td><td>"+ avgFit/popSize + "&nbsp;&nbsp;</td><td>" + population[0].genome + "</td></tr>";
+          
           //fitness evaluated, rearrange individuals
           //copy over the best by simply adding the offset in the next loop
           
@@ -863,7 +858,38 @@
             population[k].fitness = 0;
             population[k].genome = g;
           }
+          j++;
+          if(j<generationLimit) window.setTimeout(function(){ work(j); }, 300);
         }
+        work(0);
+      }
+      function sortByFitness(a,b){
+        return ((a.fitness > b.fitness) ? -1 : (a.fitness < b.fitness) ? 1:0);
+      }
+      function evolve(){
+        //clear out the existing text in our table
+        document.getElementById('fitHistory').innerHTML = "";
+        var population = Array();
+        function critter(fitness,genome){
+          this.fitness = fitness;
+          this.genome = genome;
+        }
+
+        var popSize = 24;
+        for(var i=0;i<popSize;i++){
+          population[population.length++] = new critter(0,randomGame());
+        }
+        //cheat, and seed two awesome plays
+        //population[population.length++] = new critter(0,'032A AAAA AAAA 8C00 AAAA AA8C AAAA AAAA AB00 AAAA AB22 AAAA AABA AAAA AAA8 0002 EAAA A8C0 AAAA B0AA AAAA B000 16AA AAA7 2AAA AAAA EAAA AAA7 6AAA AAAA AD6A AAAA AAD5 556A AAAA AA95 56AA AAAA AA6A AAAA AA55 6AAA AAAA 8AAA AAA9 4AAA AAAA 9556 AAAA AAA0 2AAA AAAA AA8A A6AA AAAA A556 AAAA AA00 02AA AAA0 00AA AAA2 AAAA 2AAA 82A6 AAAA A2AA 62AA A56A AAA2 D6AA AA95 76AA AA80 0AAA AAA8 02AA A802 AAA8 00AA ACAA AAEA AAD6 AAAA B556 AAAA 556A AAA6 AAAB D555 6AAA 8AAA A02A AAD5 AAAB 6AAB 555A AB56 AAE2 AA00 F7AA AC2A A83A A7AA B5AA C000 AAA5 A82A B000 A8');
+        //population[population.length++] = new critter(0,'56AA AAAA AA9A AAAA AAAA 8AAA AAAA AA00 AAAA AAAA ACAA AA8A AAB2 AAAA AAA5 6AAA AAAA 9AAA AAAA AEAA AAAA 9F5A AAAA ABD6 AAAA AAD5 6AAA AAAB 00AA AAAA AEAA AAAA FD6A AAAA BD56 AAAA AF5A AAAA FEAA AAB5 5AAA ABC2 AAAA 9BF0 0AAA AAA6 BBF0 0AAA AAAB AC02 AAAA AAEA AAAB 6AAA AB55 AAAA B56A AAAB 5AAA AA80 AAAA AA82 AAAA AB2A AAAC 02AA AAAB F6AA AAFE AAA5 6AAA AF56 AAAD 56AA BF55 AABC 2AAA 6FC0 2AAA A6BB F00A AAAA EB00 AAAA AE5A AAEA AADA AAA0 2AAA A82A AAAC AAAC 02AA AAD5 5AAA B5C0 AAB5 6AA9 AAAF 6ABD 56AB F00A AA6B BF00 AAAB A5AA B00A AAB2 AA5A A96A B55A A80A AA80 2AAA C2AA B0AA C02A AC02 A9C2 A9E9 76A6 AAEA');
+        if(document.options.one.checked){
+          population[population.length++] = new critter(0,'AAAB 00AA AAAA AB0A AAAA AAAA AAAE AAAA AD6A AAAA AAC0 0AAA AAAA C02A AAAA AAB2 28AA AAAC 2AAA AAAA E2AA AAAB 6AAA A8AA 97A5 6AAA AAAA AAEA AAAE AABA AABA ABAA');
+          popSize++;
+        }
+        workloop(population,popSize);
+        //popSize+=2;
+        
+        
       }
 		// --></script>
 
