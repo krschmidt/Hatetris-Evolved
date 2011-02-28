@@ -20,7 +20,7 @@
 				text-align: center;
 				vertical-align: middle;
 			}
-      #fitHistory td{
+      #fitHistory td,th{
         padding-right:1em;
       }
 		</style>
@@ -817,10 +817,13 @@
           var td2 = document.createElement('td');
           td2.appendChild(document.createTextNode(population[0].fitness));
           var td3 = document.createElement('td');
-          td3.appendChild(document.createTextNode(population[0].genome));
+          td3.appendChild(document.createTextNode(avgFit/popSize));
+          var td4 = document.createElement('td');
+          td4.appendChild(document.createTextNode(population[0].genome));
           row.appendChild(td1);
           row.appendChild(td2);
           row.appendChild(td3);
+          row.appendChild(td4);
           table.appendChild(row);
           //document.getElementById('fitHistory').innerHTML += "<tr><td>" + j + "&nbsp;&nbsp;</td><td>" +population[0].fitness + "&nbsp;&nbsp;</td><td>"+ avgFit/popSize + "&nbsp;&nbsp;</td><td>" + population[0].genome + "</td></tr>";
           
