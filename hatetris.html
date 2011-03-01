@@ -6,7 +6,7 @@
 		<link rel="stylesheet" type="text/css" href="reset.css" />
 		<style type="text/css">
 			body {
-				font-family: arial;
+				font-family: WorkAroundWebKitAndMozilla, monospace;
 			}
 			p {
 				margin: 10px;
@@ -22,6 +22,7 @@
 			}
       #fitHistory td,th{
         padding-right:1em;
+        border-bottom: black solid 1px;
       }
 		</style>
 		<script type="text/javascript"><!--
@@ -792,7 +793,7 @@
             returnString += hexChart[Math.floor(Math.random()*15)];
           }
         }
-        return spaceEvery4(returnString);
+        return returnString;
       }
 
       function playOne(game){
@@ -825,7 +826,7 @@
           var td3 = document.createElement('td');
           td3.appendChild(document.createTextNode(avgFit/popSize));
           var td4 = document.createElement('td');
-          td4.appendChild(document.createTextNode(population[0].genome));
+          td4.appendChild(document.createTextNode(spaceEvery4(population[0].genome)));
           row.appendChild(td1);
           row.appendChild(td2);
           row.appendChild(td3);
@@ -839,8 +840,8 @@
           //off set is 4
           toSave = Math.floor(((document.getElementById('save').value)/100)*popSize);
           for(var k=0;k<16;k+=2){
-            genome1 = population[k].genome.split(' ').join("");
-            genome2 = population[k+1].genome.split(' ').join("");
+            genome1 = population[k].genome;
+            genome2 = population[k+1].genome;
             splitPoint1 = Math.floor(Math.random()*genome1.length);
             splitPoint2 = Math.floor(Math.random()*genome2.length);
             rGenome1 = "";
@@ -857,8 +858,8 @@
             for(var i=splitPoint1;i<genome1.length;i++){
               rGenome2+=genome1.charAt(i);
             }
-            population[k+toSave].genome = spaceEvery4(rGenome1);
-            population[k+toSave+1].genome = spaceEvery4(rGenome2);
+            population[k+toSave].genome = rGenome1;
+            population[k+toSave+1].genome = rGenome2;
           }
           //randomly cut out chunks of genome
           for(var k=4;k<popSize;k++){
@@ -894,8 +895,22 @@
         }
         work(0);
       }
+      //This is really fitness related, but this way, when fitness is equal and greater than 1, it'll prefer the shorter solution
+      //TODO this might make things worse, since games might not finish - might want to &&a.genome.length > 500 or something
       function sortByFitness(a,b){
-        return ((a.fitness > b.fitness) ? -1 : (a.fitness < b.fitness) ? 1:0);
+        if(a.fitness > b.fitness)
+          return -1;
+        else if (a.fitness < b.fitness)
+          return 1;
+        //TODO something about prefer a longer one if fitness is < 0?
+        else if(a.fitness == b.fitness && a.fitness>0 && a.genome.length>60 && b.genome.length>60){
+          if(a.genome.length < b.genome.length)
+            return -1;
+          else if (a.genome.length > b.genome.length)
+            return 1;
+        }
+        return 0;
+//        return ((a.fitness > b.fitness) ? -1 : (a.fitness < b.fitness) ? 1:0);
       }
       function evolve(){
         //clear out the existing text in our table
@@ -903,7 +918,7 @@
         var population = Array();
         function critter(fitness,genome){
           this.fitness = fitness;
-          this.genome = genome;
+          this.genome = genome.split(' ').join("");;
         }
 
         var popSize = 24;
@@ -915,6 +930,10 @@
         //population[population.length++] = new critter(0,'56AA AAAA AA9A AAAA AAAA 8AAA AAAA AA00 AAAA AAAA ACAA AA8A AAB2 AAAA AAA5 6AAA AAAA 9AAA AAAA AEAA AAAA 9F5A AAAA ABD6 AAAA AAD5 6AAA AAAB 00AA AAAA AEAA AAAA FD6A AAAA BD56 AAAA AF5A AAAA FEAA AAB5 5AAA ABC2 AAAA 9BF0 0AAA AAA6 BBF0 0AAA AAAB AC02 AAAA AAEA AAAB 6AAA AB55 AAAA B56A AAAB 5AAA AA80 AAAA AA82 AAAA AB2A AAAC 02AA AAAB F6AA AAFE AAA5 6AAA AF56 AAAD 56AA BF55 AABC 2AAA 6FC0 2AAA A6BB F00A AAAA EB00 AAAA AE5A AAEA AADA AAA0 2AAA A82A AAAC AAAC 02AA AAD5 5AAA B5C0 AAB5 6AA9 AAAF 6ABD 56AB F00A AA6B BF00 AAAB A5AA B00A AAB2 AA5A A96A B55A A80A AA80 2AAA C2AA B0AA C02A AC02 A9C2 A9E9 76A6 AAEA');
         if(document.options.one.checked){
           population[population.length++] = new critter(0,'AAAB 00AA AAAA AB0A AAAA AAAA AAAE AAAA AD6A AAAA AAC0 0AAA AAAA C02A AAAA AAB2 28AA AAAC 2AAA AAAA E2AA AAAB 6AAA A8AA 97A5 6AAA AAAA AAEA AAAE AABA AABA ABAA');
+          popSize++;
+        }
+        if(document.options.two.checked){
+          population[population.length++] = new critter(0,'56AA AAAA AA9A AAAA AAAA 8AAA AAAA AA00 AAAA AAAA ACAA AA8A AAB2 AAAA AAA5 6AAA AAAA 9AAA AAAA AEAA AAAA 9F5A AAAA ABD6 AAAA AAD5 6AAA AAAB 00AA AAAA AEAA AAAA FD6A AAAA BD56 AAAA AF5A AAAA FEAA');
           popSize++;
         }
         workloop(population,popSize);
@@ -931,12 +950,13 @@
 		</div>
 		<div style="margin: 0 50px 50px 0">
       <p>Some tips:</p>
-      <p>This takes a long time to run - usually three to four minutes for just 10 generations. If you're on Firefox, you'll want to click that box that says "Do not show this warning again" when it warns you about this script taking too long.</p>
+      <p>This takes a long time to run - usually three to four minutes for just 40 generations. If you're on Firefox, you'll want to click that box that says "Do not show this warning again" when it warns you about this script taking too long.</p>
 			<p><a href="http://qntm.org/hatetris">Inspired by HATETRIS by Sam Hughes</a></p>
       <form name="options">
         <label>Number of Generations:<input type="text" name="genSize" id="genSize" value="20"></label><br>
-        <label>Percent of a newly randomly generated genome that is an 'A' (drop)<input type="text" name="aPercent" id="aPercent" value="20"></label><br>
+        <label>Percent of a newly randomly generated genome that is an 'A' (drop, drop)<input type="text" name="aPercent" id="aPercent" value="20"></label><br>
         <label>Include a One Point run in initial population?<input type="checkbox" name="one" id="one"></label><br>
+        <label>Include a different One Point run in initial population?<input type="checkbox" name="two" id="two"></label><br>
         <label>Percent to Save?<input type="text" name="save" id="save" value="20"></label>
        </form>
 <!--			<p><button type="button" onclick="startGame(0);">start new game</button></p>
@@ -944,7 +964,10 @@
       <p><button type="button" onClick="evolve();">Evolve</button></p>
 			<p><span id="score"></span></p>
 			<p><span id="replayOut"></span></p>
-      <table id="fitHistory">
+      <table>
+        <tr><th>Generation</th><th>Max Fit</th><th>Avg Fit</th><th>Genome</th></tr>
+        <tbody id="fitHistory">
+        </tbody>
       </table>
 		</div>
 	</body>
