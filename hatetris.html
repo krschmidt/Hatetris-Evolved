@@ -445,7 +445,7 @@
 				}
 
 				// and put it out there
-				document.getElementById("replayOut").innerHTML = "replay of last game: " + string;
+				document.getElementById("replayOut").innerHTML = "replay of last game:<br> " + string;
 			}
 
 			// this is an utter hack because the
@@ -581,10 +581,13 @@
 					// otherwise, allow the user to continue the game
 					if(replayIn.length > 0) {
 						inputReplayStep();
-					} else {
+					} 
+          else {
 						document.onkeydown = inputKey;
+            //TODO this is where we could return if the game is over!
 					}
 				}
+        //TODO else return game should have been longer?
 			}
 
 			// clear the field and get ready for a new game
@@ -797,7 +800,8 @@
       }
 
       function playOne(game){
-        startReplay(game); 
+        startReplay(game);
+        //TODO if startReplay returns a positive number, that's the number of moves after we die, if 0 then perfect length, if -1 then too short?
         return document.getElementById('score').innerHTML
       }
 
@@ -806,6 +810,7 @@
         var avgFit;
         function work(j){
           avgFit = 0;
+          totLen =0;
           for(var i=0;i<popSize;i++){
             population[i].fitness = parseInt(playOne(population[i].genome));
             //Tweek the fitness by -0.5 if the length is less than 45, the minimum number of moves to die
@@ -814,6 +819,7 @@
             if(population[i].genome.length < 45)
               population[i].fitness -= 0.5;
             avgFit+=population[i].fitness;
+            totLen+= population[i].genome.length;
           }
           population.sort(sortByFitness);
           //TODO for when fitness is 0, add a fitness value for length of genome? under the argument that a long genome is more likely to fill everyting in?
@@ -826,11 +832,14 @@
           var td3 = document.createElement('td');
           td3.appendChild(document.createTextNode(avgFit/popSize));
           var td4 = document.createElement('td');
-          td4.appendChild(document.createTextNode(spaceEvery4(population[0].genome)));
+          td4.appendChild(document.createTextNode(totLen/popSize));
+          var td5 = document.createElement('td');
+          td5.appendChild(document.createTextNode(spaceEvery4(population[0].genome)));
           row.appendChild(td1);
           row.appendChild(td2);
           row.appendChild(td3);
           row.appendChild(td4);
+          row.appendChild(td5);
           table.appendChild(row);
           
           //fitness evaluated, rearrange individuals
@@ -862,6 +871,7 @@
             population[k+toSave+1].genome = rGenome2;
           }
           //randomly cut out chunks of genome
+          //TODO is this actually better? Just reconsider this area...
           for(var k=4;k<popSize;k++){
             //TODO make this a parameter
             g = population[k].genome
@@ -877,11 +887,23 @@
             }
           }
           //random Mutation
+          var l=0;
           for(var k=17;k<popSize;k++){
-            g = population[k].genome;
             population[k] = Array();
             population[k].fitness = 0;
-            population[k].genome = randomGame();
+            
+            //This is for mutating the bottom ones to totally random
+            //population[k].genome = randomGame();
+
+            //This is for mutating from the top
+            g = population[l].genome;
+            population[k].genome='';
+            point = Math.floor(Math.random()*g.length);//should we set bounds here?
+            for(var m=0;m<point;m++){
+              population[k].genome+=population[l].genome.charAt(m);
+            }
+            population[k].genome += randomGame();
+            
           }
           //pad anyone less than 45 with a bunch of random crap
           for(var k=0;k<popSize;k++){
@@ -902,7 +924,6 @@
           return -1;
         else if (a.fitness < b.fitness)
           return 1;
-        //TODO something about prefer a longer one if fitness is < 0?
         else if(a.fitness == b.fitness && a.fitness>0 && a.genome.length>60 && b.genome.length>60){
           if(a.genome.length < b.genome.length)
             return -1;
@@ -938,6 +959,12 @@
         }
         workloop(population,popSize);
       }
+/*
+TODO: figure out use of external JS files, so that we can pull some of this crap out of here.
+TODO: add graphs using canvas
+TODO: make display of genome optional
+TODO: right idea with length, I think, but we want to see if they're dead yet. If you're not dead, you should be longer. Maybe this will help prevent stagnation?
+*/
 		// --></script>
 
 	</head>
@@ -965,7 +992,7 @@
 			<p><span id="score"></span></p>
 			<p><span id="replayOut"></span></p>
       <table>
-        <tr><th>Generation</th><th>Max Fit</th><th>Avg Fit</th><th>Genome</th></tr>
+        <tr><th>Generation</th><th>Max Fit</th><th>Avg Fit</th><th>Average Genome Length</th><th>Genome</th></tr>
         <tbody id="fitHistory">
         </tbody>
       </table>
