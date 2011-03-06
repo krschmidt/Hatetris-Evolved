@@ -9,7 +9,26 @@
     <script language="javascript" src="grapher.js"></script>
     <!-- Original Hatetris code - modified slightly for speed -->
     <script language="javascript" src="hatetris.js"></script>
+    <!-- Script for Evolving the solution -->
 		<script type="text/javascript"><!--
+      //build the hexChart we'll use when making random games
+      var hexChart = new Array();
+      for(var i=0;i<10;i++){
+        hexChart[i] = i;
+      }
+
+      var aPercent;
+      var toSave;
+      var rowEvery;
+
+      //hexChart[10] = 'A'; //No A's, since we'll put those in later
+      hexChart[10] = 'B';
+      hexChart[11] = 'C';
+      hexChart[12] = 'D';
+      hexChart[13] = 'E';
+      hexChart[14] = 'F';
+
+      //Adds a space after every 4th character, simply for readability
       function spaceEvery4(inputString){
         var output = '';
         for(var i=0;i<inputString.length;i++){
@@ -20,28 +39,18 @@
         return output;
       }
       
+      //creates a randon genome, of random length, but with a set % of A's
       function randomGame(){
         var returnString = '';
-        var hexChart = new Array();
-        for(var i=0;i<10;i++){
-          hexChart[i] = i;
-        }
-//        hexChart[10] = 'A';
-        hexChart[10] = 'B';
-        hexChart[11] = 'C';
-        hexChart[12] = 'D';
-        hexChart[13] = 'E';
-        hexChart[14] = 'F';
+        
         //adding a plus 45 because 45 is the minimum number of plays
         //necessary to die
         numberChars = Math.floor(Math.random()*1000)+45;
 
         for(var i=0;i<numberChars;i++){
-          //Make extra A's
-          var a = Math.floor(Math.random()*100);
-         
-          if (a <= parseInt(document.getElementById('aPercent').value)){
-            returnString+='A';
+          //Make extra A's 
+          if (Math.floor(Math.random()*100) <= aPercent){
+            returnString += 'A';
           }
           else{
             returnString += hexChart[Math.floor(Math.random()*15)];
@@ -50,11 +59,33 @@
         return returnString;
       }
 
+      //Plays a game, returns the score of the game
       function playOne(game){
         startReplay(game);
         //TODO if startReplay returns a positive number, that's the number of moves after we die, if 0 then perfect length, if -1 then too short?
-        //TODO shouldn't we use livewell.score instead of fetching the innerHTML?
-        return document.getElementById('score').innerHTML
+        return liveWell.score;
+      }
+
+      //Makes a table entry for a generation
+      function writeTableEntry(generation, maximumFit, averageFit, averageLength, genome){
+          var table = document.getElementById('fitHistory');
+          var row = document.createElement('tr');
+          var td1 = document.createElement('td');
+          td1.appendChild(document.createTextNode(generation));
+          var td2 = document.createElement('td');
+          td2.appendChild(document.createTextNode(maximumFit));
+          var td3 = document.createElement('td');
+          td3.appendChild(document.createTextNode(averageFit));
+          var td4 = document.createElement('td');
+          td4.appendChild(document.createTextNode(averageLength));
+          var td5 = document.createElement('td');
+          td5.appendChild(document.createTextNode(spaceEvery4(genome)));
+          row.appendChild(td1);
+          row.appendChild(td2);
+          row.appendChild(td3);
+          row.appendChild(td4);
+          row.appendChild(td5);
+          table.appendChild(row);
       }
 
       function workloop(population,popSize){
@@ -72,7 +103,6 @@
             population[i].fitness = parseInt(playOne(population[i].genome));
             //Tweek the fitness by -0.5 if the length is less than 45, the minimum number of moves to die
             //we only need to tweek by 0.5 since length must be > 45 in order to have any points
-            //TODO should there be more done with this? For example, pad anyone less than 45 with a random string?
             if(population[i].genome.length < 45)
               population[i].fitness -= 0.5;
             avgFit+=population[i].fitness;
@@ -89,29 +119,14 @@
             population.sort(sortByFitnessAndGenome);
           else
             population.sort(sortByFitness);
-          //TODO for when fitness is 0, add a fitness value for length of genome? under the argument that a long genome is more likely to fill everyting in?
-          var table = document.getElementById('fitHistory');
-          var row = document.createElement('tr');
-          var td1 = document.createElement('td');
-          td1.appendChild(document.createTextNode(j));
-          var td2 = document.createElement('td');
-          td2.appendChild(document.createTextNode(population[0].fitness));
-          var td3 = document.createElement('td');
-          td3.appendChild(document.createTextNode(avgFit/popSize));
-          var td4 = document.createElement('td');
-          td4.appendChild(document.createTextNode(totLen/popSize));
-          var td5 = document.createElement('td');
-          td5.appendChild(document.createTextNode(spaceEvery4(population[0].genome)));
-          row.appendChild(td1);
-          row.appendChild(td2);
-          row.appendChild(td3);
-          row.appendChild(td4);
-          row.appendChild(td5);
-          table.appendChild(row);
+
+          if(rowEvery != 0 && j % rowEvery == 0){
+            writeTableEntry(j,population[0].fitness,avgFit/popSize,totLen/popSize,population[0].genome);
+          }
+          document.getElementById("score").innerHTML = population[0].fitness;
+          document.getElementById("generation").innerHTML = j;
           
           //Graphing
-          //alert(avgFit/popSize);
-//          if(avgFit==0) avgFit+= 0.01;
           Grapher.addDataPoint(avgFit/popSize,'c','avgFit');
           Grapher.addDataPoint(totLen/popSize,'c','avgGenomeLength');
           Grapher.addDataPoint(population[0].fitness,'c','maxFitness');
@@ -119,13 +134,11 @@
             Grapher.draw('c');
           }
           
-
           //fitness evaluated, rearrange individuals
           //copy over the best by simply adding the offset in the next loop
           
           //cross over all individuals, crossing 1 with 2, 3 with 4, etc.
           //off set is 4
-          toSave = Math.floor(((document.getElementById('save').value)/100)*popSize);
           for(var k=0;k<16;k+=2){
             genome1 = population[k].genome;
             genome2 = population[k+1].genome;
@@ -190,7 +203,9 @@
             }
           }
           j++;
-          //window.scrollBy(0,500);//This is an arbritrary amount
+          if(document.getElementById('autoscroll').checked){
+            window.scrollBy(0,500);//This is an arbritrary amount
+          }
           if(j<generationLimit) window.setTimeout(function(){ work(j); }, 300);
         }
         work(0);
@@ -202,34 +217,39 @@
           return -1;
         else if (a.fitness < b.fitness)
           return 1;
-        else if(a.fitness == b.fitness && a.fitness>0 && a.genome.length>60 && b.genome.length>60){
+        else if(a.fitness>0 && a.genome.length>60 && b.genome.length>60){
           if(a.genome.length < b.genome.length)
             return -1;
           else if (a.genome.length > b.genome.length)
             return 1;
         }
         return 0;
-//        return ((a.fitness > b.fitness) ? -1 : (a.fitness < b.fitness) ? 1:0);
       }
+
       function sortByFitness(a,b){
         return ((a.fitness > b.fitness) ? -1 : (a.fitness < b.fitness) ? 1:0);
       }
       function evolve(){
-        //clear the existing canvas
+        //clear existing things on the page
         Grapher.clear('c');
-        //clear out the existing text in our table
         document.getElementById('fitHistory').innerHTML = "";
+
+        //set up variables for our next run
         var population = Array();
+        var popSize = 24;
+        aPercent = parseInt(document.getElementById('aPercent').value);
+        toSave = Math.floor(((parseInt(document.getElementById('save').value))/100)*popSize);
+        rowEvery = parseInt(document.getElementById('rowEvery').value);
+  
         function critter(fitness,genome){
           this.fitness = fitness;
           this.genome = genome.split(' ').join("");;
         }
 
-        var popSize = 24;
         for(var i=0;i<popSize;i++){
           population[population.length++] = new critter(0,randomGame());
         }
-        //cheat, and seed awesome plays
+        //Seed awesome plays
         if(document.options.one.checked){
           population[population.length++] = new critter(0,'AAAB 00AA AAAA AB0A AAAA AAAA AAAE AAAA AD6A AAAA AAC0 0AAA AAAA C02A AAAA AAB2 28AA AAAC 2AAA AAAA E2AA AAAB 6AAA A8AA 97A5 6AAA AAAA AAEA AAAE AABA AABA ABAA');
           popSize++;
@@ -249,7 +269,6 @@
         workloop(population,popSize);
       }
 /*
-TODO: figure out use of external JS files, so that we can pull some of this crap out of here.
 TODO: make display of genome optional
 TODO: right idea with length, I think, but we want to see if they're dead yet. If you're not dead, you should be longer. Maybe this will help prevent stagnation?
 TODO: fitness might be most improved by providing a decimal increase for a situation where we have:
@@ -258,6 +277,7 @@ TODO: fitness might be most improved by providing a decimal increase for a situa
 ------------        ----------|
 To counter previous point, isn't that what most people have been doing? Valid strategy, but limiting.
 TODO: Can we limit stagnation by promoting diversity? Provide two highs for fitness in the same population? Sort for both and then cross both from list a to list b and from a to a and b to b? 
+TODO: set the canvas to calculate the width of the window and automatically be that wide
 */
 		// --></script>
 
@@ -271,11 +291,11 @@ TODO: Can we limit stagnation by promoting diversity? Provide two highs for fitn
 		</div>
 		<div style="margin: 10px">
       <h3 style="font-size:175%;">Hatetris Solver</h3>
-      <p style="margin-left:0">Be warned that this takes a long time to run. Expect 10k generations to take 8 hours or so on Chrome, Windows, with a 2GHz processor.</p>
+      <p style="margin-left:0">Be warned that this takes a long time to run. Expect 10k generations to take 8 hours or so on Chrome, Windows, with a 2GHz processor. After you evolve a game, copy the genome of the game to see, click on the link below, then click on "View Replay" and paste the game in the box.</p>
 			<p style="margin-left:0;"><a href="http://qntm.org/hatetris">Inspired by HATETRIS by Sam Hughes</a></p>
       <form name="options">
         <table>
-        <tr><td><fieldset>
+        <tr><td width="300em;"><fieldset>
           <legend>Global Options</legend>
             <label><span>Number of Generations:</span>
               <input type="text" name="genSize" id="genSize" value="20">
@@ -283,10 +303,15 @@ TODO: Can we limit stagnation by promoting diversity? Provide two highs for fitn
             <label><span>Percent to Save?</span>
               <input type="text" name="save" id="save" value="20">
             </label><br>
-            <label><span>% of a randomly genome that is 'A' (drop, drop)</span>
+            <label><span>Percent of a random genome that is 'A' (drop, drop)</span>
               <input type="text" name="aPercent" id="aPercent" value="20">
             </label><br>
           </fieldset></td>
+        <td width="300em;"><fieldset>
+          <legend>Display Options</legend>
+          <label><span>Add a row to the table how often? (In generations, 0 for none)</span><input type="text" name="rowEvery" id="rowEvery" value="1"></label><br><br><br>
+          <label><span>Autoscroll?</span> <input type="checkbox" name="autoscroll" id="autoscroll"></label>
+        </fieldset></td>
         <td><fieldset>
           <legend>Initial Population</legend>
             <p>Check the ones you'd like to include in the inital population. Including higher point runs seems to prevent much evolution.</p>
@@ -305,11 +330,9 @@ TODO: Can we limit stagnation by promoting diversity? Provide two highs for fitn
         </fieldset></td></tr>
        </table>
        </form>
-<!--			<p><button type="button" onclick="startGame(0);">start new game</button></p>
-			<p><button type="button" onclick="startReplay();">show a replay</button></p>-->
       <p><button type="button" onClick="evolve();">Evolve</button></p>
-      <canvas id="c" width="900" height="300"></canvas>
-			<p><span id="score"></span></p>
+      <canvas id="c" width="1200" height="300"></canvas>
+			<p style="margin-left:0">Generation:<span style="margin-right:5em" id="generation">0</span>Max Score:<span id="score">0</span></p>
 			<!--<p><span id="replayOut"></span></p>-->
       <table>
         <tr><th>Generation</th><th>Max Fit</th><th>Avg Fit</th><th>Average Genome Length</th><th>Genome</th></tr>

@@ -1,0 +1,29 @@
+body {
+	font-family: WorkAroundWebKitAndMozilla, monospace;
+}
+p {
+	margin: 10px;
+}
+td.cell {
+	width: 25px;
+	height: 25px;
+	color: white;
+	background-color: black;
+	padding: 0;
+	text-align: center;
+	vertical-align: middle;
+}
+#fitHistory td,th{
+  padding-right:1em;
+  border-bottom: black solid 1px;
+}
+label span {
+  float:left;
+  width:12em;
+}
+label input {
+  width:4em;
+}
+legend {
+  font-size:120%;
+}
