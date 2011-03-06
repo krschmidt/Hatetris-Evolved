@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-		<title>HATETRIS @ Things Of Interest</title>
+		<title>HATETRIS Evolver</title>
 		<link rel="stylesheet" type="text/css" href="reset.css" />
 		<style type="text/css">
 			body {
@@ -23,6 +23,16 @@
       #fitHistory td,th{
         padding-right:1em;
         border-bottom: black solid 1px;
+      }
+      label span {
+        float:left;
+        width:11em;
+      }
+      label input {
+        width:5em;
+      }
+      legend {
+        font-size:120%;
       }
 		</style>
     <script language="javascript" src="grapher.js"></script>
@@ -1012,25 +1022,48 @@ TODO: Can we limit stagnation by promoting diversity? Provide two highs for fitn
 		// --></script>
 
 	</head>
-	<body style="margin: 50px 0 0 50px;" onload="createPlayingField();">
-		<div style="float: left; margin: 0 50px 50px 0;">
+	<body style="margin: 10px;" onload="createPlayingField();">
+		<div style="display:none;">
 			<table>
 				<tbody id="welltbody">
 				</tbody>
 			</table>
 		</div>
-		<div style="margin: 0 50px 50px 0">
-      <p>Some tips:</p>
-      <p>This takes a long time to run - usually three to four minutes for just 40 generations. If you're on Firefox, you'll want to click that box that says "Do not show this warning again" when it warns you about this script taking too long.</p>
-			<p><a href="http://qntm.org/hatetris">Inspired by HATETRIS by Sam Hughes</a></p>
+		<div style="margin: 10px">
+      <h3 style="font-size:175%;">Hatetris Solver</h3>
+      <p style="margin-left:0">Be warned that this takes a long time to run. Expect 10k generations to take 8 hours or so on Chrome, Windows, with a 2GHz processor.</p>
+			<p style="margin-left:0;"><a href="http://qntm.org/hatetris">Inspired by HATETRIS by Sam Hughes</a></p>
       <form name="options">
-        <label>Number of Generations:<input type="text" name="genSize" id="genSize" value="20"></label><br>
-        <label>Percent of a newly randomly generated genome that is an 'A' (drop, drop)<input type="text" name="aPercent" id="aPercent" value="20"></label><br>
-        <label>Include a 1 Point run in initial population?<input type="checkbox" name="one" id="one"></label><br>
-        <label>Include another 1 Point run in initial population?<input type="checkbox" name="two" id="two"></label><br>
-        <label>Include a 11 Point run in initial population?<input type="checkbox" name="three" id="three"></label><br>
-        <label>Include a 17 Point run in initial population?<input type="checkbox" name="four" id="four"></label><br>
-        <label>Percent to Save?<input type="text" name="save" id="save" value="20"></label>
+        <table>
+        <tr><td><fieldset>
+          <legend>Global Options</legend>
+            <label><span>Number of Generations:</span>
+              <input type="text" name="genSize" id="genSize" value="20">
+            </label><br><br>
+            <label><span>Percent to Save?</span>
+              <input type="text" name="save" id="save" value="20">
+            </label><br>
+            <label><span>% of a randomly genome that is 'A' (drop, drop)</span>
+              <input type="text" name="aPercent" id="aPercent" value="20">
+            </label><br>
+          </fieldset></td>
+        <td><fieldset>
+          <legend>Initial Population</legend>
+            <p>Check the ones you'd like to include in the inital population. Including higher point runs seems to prevent much evolution.</p>
+            <label><span>1 Point</span>
+              <input type="checkbox" name="one" id="one">
+            </label><br>
+            <label><span>Alternate 1 Point</span>
+              <input type="checkbox" name="two" id="two">
+            </label><br>
+            <label><span>11 Points</span>
+              <input type="checkbox" name="three" id="three">
+            </label><br>
+            <label><span>17 Points</span>
+              <input type="checkbox" name="four" id="four">
+            </label><br>
+        </fieldset></td></tr>
+       </table>
        </form>
 <!--			<p><button type="button" onclick="startGame(0);">start new game</button></p>
 			<p><button type="button" onclick="startReplay();">show a replay</button></p>-->
