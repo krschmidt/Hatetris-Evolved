@@ -111,9 +111,9 @@
           //TODO parameterize this?
           //gives us 200 generations of trying to prune random crap out before we move on to letting it grow
           //also checking that we have any kind of fitness may or may not be important
-          if(j%1000 && population[0].fitness > 0)
+          if(j%1000==0 && population[0].fitness > 0)
             lengthSort = true;
-          if(j%1200)
+          if(j%1200==0)
             lengthSort = false
           if(lengthSort)
             population.sort(sortByFitnessAndGenome);
@@ -130,6 +130,7 @@
           Grapher.addDataPoint(avgFit/popSize,'c','avgFit');
           Grapher.addDataPoint(totLen/popSize,'c','avgGenomeLength');
           Grapher.addDataPoint(population[0].fitness,'c','maxFitness');
+          
           if(j!=0){
             Grapher.draw('c');
           }
@@ -211,7 +212,6 @@
         work(0);
       }
       //This is really fitness related, but this way, when fitness is equal and greater than 1, it'll prefer the shorter solution
-      //TODO this might make things worse, since games might not finish - might want to &&a.genome.length > 500 or something
       function sortByFitnessAndGenome(a,b){
         if(a.fitness > b.fitness)
           return -1;
@@ -276,6 +276,8 @@ TODO: fitness might be most improved by providing a decimal increase for a situa
 ------------        ----------|
 To counter previous point, isn't that what most people have been doing? Valid strategy, but limiting.
 TODO: set the canvas to calculate the width of the window and automatically be that wide
+TODO: Graph should display the series name somewhere.
+TODO: Graph should highlight areas where we're searching for shorter solutions. This can only be done in grapher, as draw() wipes out what's currently there.
 */
 		// --></script>
 
