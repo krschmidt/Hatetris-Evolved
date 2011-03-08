@@ -269,14 +269,12 @@
         workloop(population,popSize);
       }
 /*
-TODO: make display of genome optional
 TODO: right idea with length, I think, but we want to see if they're dead yet. If you're not dead, you should be longer. Maybe this will help prevent stagnation?
 TODO: fitness might be most improved by providing a decimal increase for a situation where we have:
 |xxxxxxxx  |        |xxx  xxxx|  The important thing is that 2 slot opening, when almost any piece can provide a point.          
 |xxxxxxxx  |    or  |xxx  xxxx|
 ------------        ----------|
 To counter previous point, isn't that what most people have been doing? Valid strategy, but limiting.
-TODO: Can we limit stagnation by promoting diversity? Provide two highs for fitness in the same population? Sort for both and then cross both from list a to list b and from a to a and b to b? 
 TODO: set the canvas to calculate the width of the window and automatically be that wide
 */
 		// --></script>
@@ -291,8 +289,9 @@ TODO: set the canvas to calculate the width of the window and automatically be t
 		</div>
 		<div style="margin: 10px">
       <h3 style="font-size:175%;">Hatetris Solver</h3>
-      <p style="margin-left:0">Be warned that this takes a long time to run. Expect 10k generations to take 8 hours or so on Chrome, Windows, with a 2GHz processor. After you evolve a game, copy the genome of the game to see, click on the link below, then click on "View Replay" and paste the game in the box.</p>
-			<p style="margin-left:0;"><a href="http://qntm.org/hatetris">Inspired by HATETRIS by Sam Hughes</a></p>
+      <p>Be warned that this takes a long time to run. Expect 10k generations to take 8 hours or so on Chrome, Windows, with a 2GHz processor. After you evolve a game, copy the genome of the game to see, click on the link below, then click on "View Replay" and paste the game in the box.</p>
+      <p>This is probably the wrong solution, but this was more about me building things in Javascript than anything else.</p>
+			<p><a href="http://qntm.org/hatetris">Inspired by HATETRIS by Sam Hughes</a></p>
       <form name="options">
         <table>
         <tr><td width="300em;"><fieldset>
@@ -331,8 +330,10 @@ TODO: set the canvas to calculate the width of the window and automatically be t
        </table>
        </form>
       <p><button type="button" onClick="evolve();">Evolve</button></p>
-      <canvas id="c" width="1200" height="300"></canvas>
-			<p style="margin-left:0">Generation:<span style="margin-right:5em" id="generation">0</span>Max Score:<span id="score">0</span></p>
+      <div class="hor">
+        <canvas id="c" width="15" height="300"></canvas>
+      </div>
+			<p>Generation:<span style="margin-right:5em" id="generation">0</span>Max Score:<span id="score">0</span></p>
 			<!--<p><span id="replayOut"></span></p>-->
       <table>
         <tr><th>Generation</th><th>Max Fit</th><th>Avg Fit</th><th>Average Genome Length</th><th>Genome</th></tr>

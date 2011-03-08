@@ -2,7 +2,7 @@ body {
 	font-family: WorkAroundWebKitAndMozilla, monospace;
 }
 p {
-	margin: 10px;
+  margin-bottom:0.5em;
 }
 td.cell {
 	width: 25px;
@@ -26,4 +26,10 @@ label input {
 }
 legend {
   font-size:120%;
+}
+.hor{
+width:100%;
+height:320px;
+overflow:auto;
+white-space: nowrap;
 }

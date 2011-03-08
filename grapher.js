@@ -52,11 +52,16 @@ var Grapher = {
       }    
     },
 
-    //TODO add something for just one point? like draw a dot?
     draw:function(canvasName){
       canvas = document.getElementById(canvasName);
-      //wipe the canvas
-      canvas.width = canvas.width;
+      //wipe the canvas, resizing to a little bigger than # of data points
+      //This is a hack, but I can't come up with a better way to do it without
+      //switching to lists(more work than I'm good for at this time of the
+      //evening)
+      for(var series in allPoints){
+        canvas.width = allPoints[series].length + 5;
+        break;
+      }
       var ctx = canvas.getContext("2d");
       colors = ['red','blue','green','purple','orange'];
       var z=0;
@@ -77,10 +82,15 @@ var Grapher = {
 
 
     },
-
+    // 800 is arbitrary, but is probably smaller than most screens
     clear:function(canvasName){
       canvas = document.getElementById(canvasName);
-      canvas.width = canvas.width;
+      if(canvas.width >= 800){
+        canvas.width = 800;
+      }
+      else{
+        canvas.width = canvas.width;
+      }
       allPoints=Array();
       dataPoints=Array();      
     }
