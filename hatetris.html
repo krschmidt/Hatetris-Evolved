@@ -125,7 +125,7 @@
           else
             population.sort(sortByFitness);
 
-          if(rowEvery != 0 && j % rowEvery == 0){
+          if(rowEvery != 0 && (j % rowEvery == 0 || j==generationLimit)){
             writeTableEntry(j,population[0].fitness,avgFit/popSize,totLen/popSize,population[0].genome);
           }
           document.getElementById("score").innerHTML = population[0].fitness;
@@ -302,7 +302,7 @@ TODO: Graph should highlight areas where we're searching for shorter solutions. 
 			<p><a href="http://qntm.org/hatetris">Inspired by HATETRIS by Sam Hughes</a></p>
       <form name="options">
         <table>
-        <tr><td style="width:18em;"><fieldset>
+        <tr><td rowspan="2" style="width:18em;"><fieldset>
           <legend>Global Options</legend>
             <label><span>Number of Generations:</span>
               <input type="text" name="genSize" id="genSize" value="20">
@@ -318,7 +318,7 @@ TODO: Graph should highlight areas where we're searching for shorter solutions. 
             </label><br>
             <label><span>Percent of a random genome that is 'A' (drop, drop)</span>
               <input type="text" name="aPercent" id="aPercent" value="20">
-            </label><br><br><br>
+            </label><br><br>
             <label><span>How often it tries to shrink genome (0 for never)</span>
               <input type="text" name="numGenShrink" id="numGenShrink" value="200">
             </label><br><br>
@@ -330,8 +330,8 @@ TODO: Graph should highlight areas where we're searching for shorter solutions. 
           <legend>Display Options</legend>
           <label><span>Add a row to the table how often? (In generations, 0 for none)</span><input type="text" name="rowEvery" id="rowEvery" value="1"></label><br><br><br>
           <label><span>Autoscroll?</span> <input type="checkbox" name="autoscroll" id="autoscroll"></label><br>
-        </fieldset></td>
-        <td><fieldset>
+        </fieldset></td></tr>
+        <tr><td><fieldset>
           <legend>Initial Population</legend>
             <p>Check the ones you'd like to include in the inital population. Including higher point runs seems to prevent much evolution.</p>
             <label><span>1 Point</span>
