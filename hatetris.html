@@ -146,7 +146,8 @@
           
           //cross over all individuals, crossing 1 with 2, 3 with 4, etc.
           //off set is 4
-          for(var k=0;k<16;k+=2){
+          numberToCross = Math.floor(document.getElementById('cross')/100 * popSize)
+          for(var k=0;k<numberToCross;k+=2){
             genome1 = population[k].genome;
             genome2 = population[k+1].genome;
             splitPoint1 = Math.floor(Math.random()*genome1.length);
@@ -242,7 +243,7 @@
 
         //set up variables for our next run
         var population = Array();
-        var popSize = 24;
+        var popSize = parseInt(document.getElementById('populationSize').value);
         aPercent = parseInt(document.getElementById('aPercent').value);
         toSave = Math.floor(((parseInt(document.getElementById('save').value))/100)*popSize);
         rowEvery = parseInt(document.getElementById('rowEvery').value);
@@ -306,8 +307,14 @@ TODO: Graph should highlight areas where we're searching for shorter solutions. 
             <label><span>Number of Generations:</span>
               <input type="text" name="genSize" id="genSize" value="20">
             </label><br><br>
+            <label><span>Population Size: </span>
+              <input type="text" name="populationSize" id="populationSize" value="40">
+            </label><br>
             <label><span>Percent to Save?</span>
               <input type="text" name="save" id="save" value="20">
+            </label><br>
+            <label><span>Percent to Cross?</span>
+              <input type="text" name="cross" id="cross" value="80">
             </label><br>
             <label><span>Percent of a random genome that is 'A' (drop, drop)</span>
               <input type="text" name="aPercent" id="aPercent" value="20">
