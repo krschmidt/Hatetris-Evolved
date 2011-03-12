@@ -1,0 +1,3 @@
+Hatetris (Hate Tetris) is a rather challenging deterministic tetris game put together by Sam Hughes (http://qntm.org/files/hatetris/hatetris.html). His original goals were to learn something about JavaScript. Mine are the same. HateTris Evolved attmepts to use Genetic Algorithms to find a game that will score more points than I can. 
+
+The only current fitness measure is number of lines. Normal fitness measures, such as detecting "holes" on the board, have been left out deliberately, as I'm not sure those fitness measures apply to Hatetris, where in order to score points you have to deliberately leave chunks open to "trick" it into giving you the piece you need. 
