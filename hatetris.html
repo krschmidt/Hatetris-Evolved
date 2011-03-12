@@ -94,6 +94,7 @@
         Grapher.addSeries("avgFit");
         Grapher.addSeries("avgGenomeLength");
         Grapher.addSeries("maxFitness");
+        Grapher.addSeries("bestGenomeLength");
         var avgFit;
         var lengthSort = false;
         function work(j){
@@ -134,7 +135,8 @@
           Grapher.addDataPoint(avgFit/popSize,'c','avgFit');
           Grapher.addDataPoint(totLen/popSize,'c','avgGenomeLength');
           Grapher.addDataPoint(population[0].fitness,'c','maxFitness');
-          
+          //TODO if no one has a positive fitness, we don't want to add a datapoint for this below
+          Grapher.addDataPoint(population[0].genome.length, 'c', 'bestGenomeLength');
           if(j!=0){
             Grapher.draw('c');
           }
@@ -275,11 +277,10 @@
 /*
 TODO: right idea with length, I think, but we want to see if they're dead yet. If you're not dead, you should be longer. Maybe this will help prevent stagnation?
 TODO: fitness might be most improved by providing a decimal increase for a situation where we have:
-|xxxxxxxx  |        |xxx  xxxx|  The important thing is that 2 slot opening, when almost any piece can provide a point.          
-|xxxxxxxx  |    or  |xxx  xxxx|
-------------        ----------|
+|xxxxxxxx  |        |xxx  xxxx|  The important thing is that 2 slot        
+|xxxxxxxx  |    or  |xxx  xxxx|   opening, when almost any piece can
+------------        ----------|   provide a point.  
 To counter previous point, isn't that what most people have been doing? Valid strategy, but limiting.
-TODO: set the canvas to calculate the width of the window and automatically be that wide
 TODO: Graph should display the series name somewhere.
 TODO: Graph should highlight areas where we're searching for shorter solutions. This can only be done in grapher, as draw() wipes out what's currently there.
 */
@@ -321,7 +322,7 @@ TODO: Graph should highlight areas where we're searching for shorter solutions. 
         <td style="width:20em"><fieldset>
           <legend>Display Options</legend>
           <label><span>Add a row to the table how often? (In generations, 0 for none)</span><input type="text" name="rowEvery" id="rowEvery" value="1"></label><br><br><br>
-          <label><span>Autoscroll?</span> <input type="checkbox" name="autoscroll" id="autoscroll"></label>
+          <label><span>Autoscroll?</span> <input type="checkbox" name="autoscroll" id="autoscroll"></label><br>
         </fieldset></td>
         <td><fieldset>
           <legend>Initial Population</legend>
@@ -342,7 +343,7 @@ TODO: Graph should highlight areas where we're searching for shorter solutions. 
        </table>
        </form>
       <p><button type="button" onClick="evolve();">Evolve</button></p>
-      <div class="hor">
+      <div class="hor" id="horDiv">
         <canvas id="c" width="15" height="300"></canvas>
       </div>
 			<p>Generation:<span style="margin-right:5em" id="generation">0</span>Max Score:<span id="score">0</span></p>
