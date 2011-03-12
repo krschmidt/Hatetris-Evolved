@@ -125,7 +125,7 @@
           else
             population.sort(sortByFitness);
 
-          if(rowEvery != 0 && (j % rowEvery == 0 || j==generationLimit)){
+          if(rowEvery != 0 && (j % rowEvery == 0 || j==generationLimit-1)){
             writeTableEntry(j,population[0].fitness,avgFit/popSize,totLen/popSize,population[0].genome);
           }
           document.getElementById("score").innerHTML = population[0].fitness;
